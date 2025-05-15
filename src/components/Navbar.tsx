@@ -11,6 +11,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
+import WalletConnect from "./WalletConnect";
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -33,6 +34,7 @@ const Navbar = () => {
     { name: "Home", href: "/" },
     { name: "About", href: "#about" },
     { name: "FAQs", href: "#faqs" },
+    { name: "My NFTs", href: "/my-nfts" },
     { name: "GitHub", href: "#github" },
   ];
 
@@ -90,12 +92,7 @@ const Navbar = () => {
             >
               Learn More
             </Button>
-            <Button 
-              className="bg-gradient-primary hover:bg-proofmint-vivid-purple transition-all duration-300 shadow-md hover:shadow-lg"
-              size="sm"
-            >
-              Connect Wallet
-            </Button>
+            <WalletConnect />
           </div>
         </div>
 
@@ -139,9 +136,9 @@ const Navbar = () => {
                 >
                   Learn More
                 </Button>
-                <Button className="w-full bg-gradient-primary hover:bg-proofmint-vivid-purple shadow-md">
-                  Connect Wallet
-                </Button>
+                <div className="w-full">
+                  <WalletConnect />
+                </div>
               </div>
             </nav>
           </div>

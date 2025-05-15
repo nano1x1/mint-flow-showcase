@@ -1,7 +1,9 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { toast } from "@/components/ui/use-toast";
+import { Wallet } from "lucide-react";
 
 const mockWallets = [
   { id: "metamask", name: "MetaMask", icon: "🦊" },
@@ -14,15 +16,35 @@ const WalletConnect = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [connectedAddress, setConnectedAddress] = useState<string | null>(null);
   
+  useEffect(() => {
+    // Check if address is stored in localStorage on component mount
+    const storedAddress = localStorage.getItem("connectedAddress");
+    if (storedAddress) {
+      setConnectedAddress(storedAddress);
+    }
+  }, []);
+  
   const handleConnect = (walletId: string) => {
     // Mock connection - in a real app, this would use thirdweb's SDK
     const mockAddress = "0x71C7656EC7ab88b098defB751B7401B5f6d8976F";
     setConnectedAddress(mockAddress);
+    localStorage.setItem("connectedAddress", mockAddress);
     setIsOpen(false);
+    
+    toast({
+      title: "Wallet Connected",
+      description: `Connected with ${walletId}`,
+    });
   };
   
   const handleDisconnect = () => {
     setConnectedAddress(null);
+    localStorage.removeItem("connectedAddress");
+    
+    toast({
+      title: "Wallet Disconnected",
+      description: "Your wallet has been disconnected",
+    });
   };
   
   const formatAddress = (address: string) => {
@@ -35,15 +57,17 @@ const WalletConnect = () => {
         <Button 
           onClick={handleDisconnect}
           variant="outline"
-          className="border-proofmint-purple text-proofmint-purple hover:bg-proofmint-soft-purple"
+          className="border-proofmint-purple text-proofmint-purple hover:bg-proofmint-soft-purple w-full md:w-auto"
         >
+          <Wallet className="h-4 w-4 mr-2" />
           {formatAddress(connectedAddress)}
         </Button>
       ) : (
         <Button 
           onClick={() => setIsOpen(true)}
-          className="bg-gradient-primary hover:opacity-90"
+          className="bg-gradient-primary hover:opacity-90 w-full md:w-auto"
         >
+          <Wallet className="h-4 w-4 mr-2" />
           Connect Wallet
         </Button>
       )}
