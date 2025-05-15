@@ -1,3 +1,6 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -13,7 +16,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 252 88% 74%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -32,7 +35,7 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -96,6 +99,35 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-inter;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  .font-inter {
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-proofmint-purple to-proofmint-vivid-purple animate-gradient-move;
+    background-size: 200% auto;
+  }
+  
+  .bg-gradient-primary {
+    @apply bg-gradient-to-br from-proofmint-purple to-proofmint-tertiary-purple;
+  }
+  
+  .bg-gradient-animated {
+    @apply bg-gradient-to-r from-proofmint-purple via-proofmint-secondary-purple to-proofmint-tertiary-purple animate-gradient-move;
+    background-size: 200% auto;
+  }
+  
+  .glass {
+    @apply backdrop-blur-md bg-white/20 border border-white/10;
+  }
+  
+  .glass-card {
+    @apply backdrop-blur-md bg-white/10 border border-white/20 shadow-lg;
   }
 }
