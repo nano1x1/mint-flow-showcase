@@ -1,214 +1,237 @@
 
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
+import { toast } from "@/components/ui/use-toast";
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import { ArrowLeft, Share2, Heart } from "lucide-react";
 
-// Mock NFT data for the demonstration
-const mockNFTs = {
-  "eth-denver-2025": {
-    id: "eth-denver-2025",
-    name: "ETH Denver 2025",
-    image: "https://placehold.co/400x400/9b87f5/FFFFFF?text=ETHDenver",
-    description: "Proof of attendance for ETH Denver 2025",
-    claimed: true,
-    event: "ETH Denver 2025",
-    date: "February 12-16, 2025",
-    location: "Denver, Colorado",
-    metadata: {
-      blockchain: "Ethereum",
-      contractAddress: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
-      tokenId: "12345",
-      tokenStandard: "ERC-721",
-    }
-  },
-  "devcon-2025": {
-    id: "devcon-2025",
-    name: "Devcon 7",
-    image: "https://placehold.co/400x400/7E69AB/FFFFFF?text=Devcon7",
-    description: "You participated in Devcon 7 in Bangkok",
-    claimed: false,
-    event: "Devcon 7",
-    date: "October 10-13, 2025",
-    location: "Bangkok, Thailand",
-    metadata: {
-      blockchain: "Ethereum",
-      contractAddress: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
-      tokenId: "23456",
-      tokenStandard: "ERC-721",
-    }
-  },
-  "gated-nft-university": {
-    id: "gated-nft-university",
-    name: "Gated NFT University",
-    image: "https://placehold.co/400x400/8B5CF6/FFFFFF?text=GatedNFT",
-    description: "Proof of participation in Gated NFTs University Hackathon 2025",
-    claimed: false,
-    event: "Gated NFTs University Hackathon",
-    date: "May 15-30, 2025",
-    location: "Online",
-    metadata: {
-      blockchain: "Ethereum",
-      contractAddress: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
-      tokenId: "34567",
-      tokenStandard: "ERC-721",
-    }
-  },
-  "proof-of-knowledge": {
-    id: "proof-of-knowledge",
-    name: "Proof of Knowledge",
-    image: "https://placehold.co/400x400/1EAEDB/FFFFFF?text=PoK",
-    description: "Completed all tutorials in the knowledge base",
-    claimed: false,
-    event: "Knowledge Base Completion",
-    date: "Ongoing",
-    location: "Online",
-    metadata: {
-      blockchain: "Ethereum",
-      contractAddress: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
-      tokenId: "45678",
-      tokenStandard: "ERC-721",
-    }
-  }
-};
+// Define NFT interface
+interface NFT {
+  id: string;
+  name: string;
+  image: string;
+  description: string;
+  price: string;
+  claimed: boolean;
+  creator: string;
+  collection: string;
+  attributes?: { trait_type: string; value: string }[];
+}
 
 const NFTDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const [nft, setNft] = useState<any>(null);
+  const navigate = useNavigate();
+  const [nft, setNft] = useState<NFT | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate loading data
-    setLoading(true);
-    setTimeout(() => {
-      if (id && mockNFTs[id as keyof typeof mockNFTs]) {
-        setNft(mockNFTs[id as keyof typeof mockNFTs]);
+    // Check if wallet is connected
+    const connectedAddress = localStorage.getItem("connectedAddress");
+    if (!connectedAddress) {
+      toast({
+        title: "Wallet not connected",
+        description: "Please connect your wallet to view NFT details",
+      });
+      navigate("/");
+      return;
+    }
+
+    // Mock fetch NFT data - in real app this would call the blockchain
+    const fetchNFT = async () => {
+      try {
+        // Simulate API call delay
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        // Mock NFT data based on id
+        const mockNFT: NFT = {
+          id: id || "1",
+          name: `Digital Dreamscape #${id}`,
+          image: `https://images.unsplash.com/photo-163498666667${id}-ec8fd927c23d?q=80&w=1935&auto=format&fit=crop`,
+          description: "An ethereal landscape of digital dreams and algorithmic beauty. This unique piece captures the essence of digital art with vibrant colors and intricate patterns that seem to shift and change as you view them from different angles.",
+          price: "0.05 ETH",
+          claimed: Math.random() > 0.5,
+          creator: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
+          collection: "Digital Dreamscapes",
+          attributes: [
+            { trait_type: "Background", value: "Cosmic" },
+            { trait_type: "Style", value: "Abstract" },
+            { trait_type: "Colors", value: "Vibrant" },
+            { trait_type: "Rarity", value: "Uncommon" }
+          ]
+        };
+        
+        setNft(mockNFT);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching NFT:", error);
+        setLoading(false);
+        toast({
+          title: "Error",
+          description: "Failed to load NFT details. Please try again.",
+          variant: "destructive"
+        });
       }
-      setLoading(false);
-    }, 500);
-  }, [id]);
+    };
+
+    fetchNFT();
+  }, [id, navigate]);
+
+  const handleClaimNFT = () => {
+    if (!nft) return;
+    
+    // Mock claiming an NFT - in real app this would call a smart contract
+    setNft({
+      ...nft,
+      claimed: true
+    });
+    
+    toast({
+      title: "NFT Claimed!",
+      description: `You successfully claimed ${nft.name}`,
+    });
+  };
+
+  const handleGoBack = () => {
+    navigate(-1);
+  };
 
   if (loading) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="container mx-auto pt-32 pb-20 px-4 flex items-center justify-center">
-          <div className="animate-pulse text-xl">Loading...</div>
+        <div className="container mx-auto px-4 py-16 pt-24">
+          <div className="animate-pulse">
+            <div className="h-8 w-48 bg-gray-200 rounded mb-4"></div>
+            <div className="flex flex-col md:flex-row gap-8">
+              <div className="w-full md:w-1/2 aspect-square bg-gray-200 rounded-lg"></div>
+              <div className="w-full md:w-1/2">
+                <div className="h-10 w-3/4 bg-gray-200 rounded mb-4"></div>
+                <div className="h-4 w-1/4 bg-gray-200 rounded mb-8"></div>
+                <div className="h-4 w-full bg-gray-200 rounded mb-2"></div>
+                <div className="h-4 w-full bg-gray-200 rounded mb-2"></div>
+                <div className="h-4 w-3/4 bg-gray-200 rounded mb-8"></div>
+                <div className="h-10 w-1/2 bg-gray-200 rounded"></div>
+              </div>
+            </div>
+          </div>
         </div>
-        <Footer />
       </div>
     );
   }
 
   if (!nft) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="container mx-auto pt-32 pb-20 px-4 flex flex-col items-center justify-center">
-          <h1 className="text-3xl font-bold mb-6">NFT Not Found</h1>
-          <p className="text-muted-foreground mb-6">The NFT you're looking for doesn't exist or has been removed.</p>
-          <Link to="/my-nfts">
-            <Button>
-              Back to My NFTs <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+        <div className="container mx-auto px-4 py-16 pt-24">
+          <div className="text-center py-16">
+            <h2 className="text-2xl font-bold mb-2">NFT Not Found</h2>
+            <p className="text-muted-foreground mb-8">The NFT you're looking for doesn't exist or has been removed.</p>
+            <Button onClick={handleGoBack}>Go Back</Button>
+          </div>
         </div>
-        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Navbar />
-      
-      <div className="container mx-auto pt-32 pb-20 px-4">
-        <div className="flex flex-col md:flex-row gap-8">
-          <motion.div 
-            className="w-full md:w-1/2"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
+      <div className="container mx-auto px-4 py-16">
+        <div className="max-w-6xl mx-auto pt-16">
+          <Button 
+            variant="ghost" 
+            onClick={handleGoBack}
+            className="mb-6"
           >
-            <div className="rounded-2xl overflow-hidden border border-white/10 bg-white/5 backdrop-blur">
-              <img 
-                src={nft.image} 
-                alt={nft.name}
-                className="w-full h-auto object-cover"
-              />
-            </div>
-          </motion.div>
+            <ArrowLeft className="h-4 w-4 mr-2" /> Back
+          </Button>
           
-          <motion.div 
-            className="w-full md:w-1/2"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <h1 className="text-3xl md:text-4xl font-bold mb-2">{nft.name}</h1>
-            <p className="text-xl text-muted-foreground mb-6">{nft.description}</p>
+          <div className="flex flex-col md:flex-row gap-8">
+            <motion.div 
+              className="w-full md:w-1/2"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="rounded-lg overflow-hidden border-2 border-border">
+                <img 
+                  src={nft.image.replace("163498666667", "163498666667" + (parseInt(nft.id) % 10))} 
+                  alt={nft.name}
+                  className="w-full aspect-square object-cover"
+                />
+              </div>
+              
+              <div className="mt-4 flex justify-between items-center">
+                <div>
+                  <p className="text-sm text-muted-foreground">Collection</p>
+                  <p className="font-medium">{nft.collection}</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="icon">
+                    <Heart className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="icon">
+                    <Share2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-              <div className="bg-white/5 backdrop-blur p-4 rounded-xl">
-                <h3 className="text-sm text-muted-foreground mb-1">Event</h3>
-                <p className="font-medium">{nft.event}</p>
+            <motion.div 
+              className="w-full md:w-1/2"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+            >
+              <h1 className="text-3xl font-bold mb-2">{nft.name}</h1>
+              <p className="text-xl text-green-600 font-semibold mb-6">{nft.price}</p>
+              
+              <div className="mb-6">
+                <h2 className="text-lg font-semibold mb-2">Description</h2>
+                <p className="text-muted-foreground">{nft.description}</p>
               </div>
-              <div className="bg-white/5 backdrop-blur p-4 rounded-xl">
-                <h3 className="text-sm text-muted-foreground mb-1">Date</h3>
-                <p className="font-medium">{nft.date}</p>
+              
+              <div className="mb-6">
+                <h2 className="text-lg font-semibold mb-2">Creator</h2>
+                <p className="text-muted-foreground font-mono">{nft.creator}</p>
               </div>
-              <div className="bg-white/5 backdrop-blur p-4 rounded-xl">
-                <h3 className="text-sm text-muted-foreground mb-1">Location</h3>
-                <p className="font-medium">{nft.location}</p>
-              </div>
-              <div className="bg-white/5 backdrop-blur p-4 rounded-xl">
-                <h3 className="text-sm text-muted-foreground mb-1">Status</h3>
-                <p className="font-medium">{nft.claimed ? "Claimed" : "Not Claimed"}</p>
-              </div>
-            </div>
-            
-            <div className="bg-white/5 backdrop-blur p-6 rounded-xl mb-8">
-              <h2 className="text-xl font-semibold mb-4">Token Details</h2>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Blockchain</span>
-                  <span>{nft.metadata.blockchain}</span>
+              
+              {nft.attributes && nft.attributes.length > 0 && (
+                <div className="mb-8">
+                  <h2 className="text-lg font-semibold mb-2">Attributes</h2>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {nft.attributes.map((attr, index) => (
+                      <div 
+                        key={index} 
+                        className="bg-proofmint-soft-purple rounded-lg p-3 text-center"
+                      >
+                        <p className="text-xs text-muted-foreground">{attr.trait_type}</p>
+                        <p className="font-medium text-sm">{attr.value}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Contract</span>
-                  <span className="text-sm">{`${nft.metadata.contractAddress.substring(0, 6)}...${nft.metadata.contractAddress.substring(38)}`}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Token ID</span>
-                  <span>{nft.metadata.tokenId}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Standard</span>
-                  <span>{nft.metadata.tokenStandard}</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex gap-4">
-              <Link to="/my-nfts" className="flex-1">
-                <Button variant="outline" className="w-full">
-                  Back to My NFTs
+              )}
+              
+              {!nft.claimed ? (
+                <Button 
+                  onClick={handleClaimNFT}
+                  className="w-full sm:w-auto px-8 bg-gradient-primary hover:opacity-90"
+                >
+                  Claim This NFT
                 </Button>
-              </Link>
-              {!nft.claimed && (
-                <Button className="flex-1 bg-gradient-primary hover:opacity-90">
-                  Claim This NFT <ArrowRight className="ml-2 h-4 w-4" />
+              ) : (
+                <Button disabled className="w-full sm:w-auto px-8">
+                  Already Claimed
                 </Button>
               )}
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </div>
       </div>
-      
-      <Footer />
     </div>
   );
 };

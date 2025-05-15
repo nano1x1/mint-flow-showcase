@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { toast } from "@/components/ui/use-toast";
 import { Wallet } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const mockWallets = [
   { id: "metamask", name: "MetaMask", icon: "🦊" },
@@ -15,6 +16,7 @@ const mockWallets = [
 const WalletConnect = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [connectedAddress, setConnectedAddress] = useState<string | null>(null);
+  const navigate = useNavigate();
   
   useEffect(() => {
     // Check if address is stored in localStorage on component mount
@@ -35,6 +37,9 @@ const WalletConnect = () => {
       title: "Wallet Connected",
       description: `Connected with ${walletId}`,
     });
+    
+    // Navigate to NFT list page after successful connection
+    navigate("/my-nfts");
   };
   
   const handleDisconnect = () => {
@@ -45,6 +50,11 @@ const WalletConnect = () => {
       title: "Wallet Disconnected",
       description: "Your wallet has been disconnected",
     });
+    
+    // Navigate to home after disconnecting
+    if (window.location.pathname !== "/") {
+      navigate("/");
+    }
   };
   
   const formatAddress = (address: string) => {
